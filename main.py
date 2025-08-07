@@ -29,7 +29,15 @@ async def buscar_cep(cep: str):
     url = f"https://viacep.com.br/ws/{cep_limpo}/json/"
     response = requests.get(url)
     if response.status_code != 200:
-        return {"error": "CEP não encontrado"}
+        raise HTTPException(status_code=404, detail="CEP não encontrado")
     dados = response.json()
-    
+    if 'erro' in dados :
+        raise HTTPException(status_code=404, detail="CEP invalido ou não encontrado")
+    #armazena no cache
+    cache[cep_limpo] = {
+        'data': dados,
+        'timestamp': agora
+    }
     return dados 
+
+
